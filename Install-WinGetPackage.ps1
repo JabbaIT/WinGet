@@ -11,6 +11,10 @@
     .PARAMETER AcceptAgreements
         Auto Accept the package Agreements
 
+    .PARAMETER Scope
+        Select if to install Package as User or Machine Level
+        By Default it will install as User
+
     .EXAMPLE
         .\Install-WinGetPackage.ps1 -PackageId Google.Chrome
         This example will install Google Chrome
@@ -19,12 +23,16 @@
         .\Install-WinGetPackage.ps1 -PackageId Google.Chrome -AcceptAgreements
         This example will install Google Chrome and auto accept the agreements
 
+    .EXAMPLE
+        .\Install-WinGetPackage.ps1 -PackageId Google.Chrome -AcceptAgreements -Scope Machine
+        This example will install Google Chrome and auto accept the agreements and install as Machine Level
+
     .NOTES
         =================================
             Author: Jamie Price
             Date: 26/07/2022
             FileName: Install-WinGetPackage.ps1
-            Version = 1.0
+            Version = 1.1
         =================================
 #>
 
@@ -34,17 +42,37 @@ param(
     [string]$PackageId, 
 
     [parameter(Mandatory = $false, Position = 2)]
-    [switch]$AcceptAgreements
+    [switch]$AcceptAgreements, 
+
+    [parameter(Mandatory = $false, HelpMessage = "Select if User or Machine Installation Scope", Position = 3)]
+    [ValidateSet('User', 'Machine')]
+    [string]$Scope = "User"
 )
 
 try {
     
     if(!$AcceptAgreements) {
         Write-Verbose -Message "Install WinGet Package $($PackageId)"
-        Start-Process -FilePath "WinGet" -ArgumentList "install -e --id $($PackageId)" -ErrorAction Stop -Wait -NoNewWindow
+        
+        if($scope -eq "Machine" ) {
+            Write-Verbose -Message "Install $($PackageId) as Machine"
+            Start-Process -FilePath "WinGet" -ArgumentList "install -e --id $($PackageId) --scope Machine" -ErrorAction Stop -Wait -NoNewWindow
+        }
+        else {
+            Write-Verbose -Message "Install $($PackageId) as User"
+            Start-Process -FilePath "WinGet" -ArgumentList "install -e --id $($PackageId) --scope User" -ErrorAction Stop -Wait -NoNewWindow
+        }
     } else {
         Write-Verbose -Message "Install WinGet Package $($PackageId) with Package Agreement Selected"
-        Start-Process -FilePath "WinGet" -ArgumentList "install --id $($PackageId) --accept-package-agreements" -ErrorAction Stop -Wait -NoNewWindow
+
+        if($scope -eq "Machine" ) {        
+            Write-Verbose -Message "Install $($PackageId) as Machine"
+            Start-Process -FilePath "WinGet" -ArgumentList "install --id $($PackageId) --accept-package-agreements --scope Machine " -ErrorAction Stop -Wait -NoNewWindow
+        }
+        else {
+            Write-Verbose -Message "Install $($PackageId) as User"
+            Start-Process -FilePath "WinGet" -ArgumentList "install --id $($PackageId) --accept-package-agreements --scope User " -ErrorAction Stop -Wait -NoNewWindow
+        }
     }
 
     Write-Verbose -Message "Checking if the Package Installed"
@@ -52,7 +80,6 @@ try {
     {
         Write-Host "$($PackageId) installed" -ForegroundColor Green
     }
-
 }
 catch {
     Write-Error -Message "Failed to install $($PackageId)" -Category NotInstalled
