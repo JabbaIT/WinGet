@@ -38,12 +38,15 @@
 
 [cmdletbinding()]
 param(
+    # PackageId Parameter    
     [parameter(Mandatory = $true, HelpMessage = "Enter in the name of the WinGet package to install", Position = 1)]
     [string]$PackageId, 
 
+    # Auto Agreement Acceptance Switch
     [parameter(Mandatory = $false, Position = 2)]
     [switch]$AcceptAgreements, 
 
+    # Scope of Installation
     [parameter(Mandatory = $false, HelpMessage = "Select if User or Machine Installation Scope", Position = 3)]
     [ValidateSet('User', 'Machine')]
     [string]$Scope = "User"
@@ -51,9 +54,11 @@ param(
 
 try {
     
+    # As Accpet Agreement Switch enabled
     if(!$AcceptAgreements) {
         Write-Verbose -Message "Install WinGet Package $($PackageId)"
         
+        # Is this going to be Machine Scope Install
         if($scope -eq "Machine" ) {
             Write-Verbose -Message "Install $($PackageId) as Machine"
             Start-Process -FilePath "WinGet" -ArgumentList "install -e --id $($PackageId) --scope Machine" -ErrorAction Stop -Wait -NoNewWindow
@@ -64,7 +69,7 @@ try {
         }
     } else {
         Write-Verbose -Message "Install WinGet Package $($PackageId) with Package Agreement Selected"
-
+        # Is this going to be Machine Scope Install
         if($scope -eq "Machine" ) {        
             Write-Verbose -Message "Install $($PackageId) as Machine"
             Start-Process -FilePath "WinGet" -ArgumentList "install --id $($PackageId) --accept-package-agreements --scope Machine " -ErrorAction Stop -Wait -NoNewWindow
@@ -75,6 +80,7 @@ try {
         }
     }
 
+    # Todo - Look how to get output of install
     Write-Verbose -Message "Checking if the Package Installed"
     if($LASTEXITCODE -ne 0) 
     {
