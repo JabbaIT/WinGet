@@ -46,7 +46,10 @@ param(
     [parameter(Mandatory = $false, Position = 2)]
     [switch]$AcceptAgreements, 
 
+<<<<<<< HEAD
     # Scope of Installation
+=======
+>>>>>>> main
     [parameter(Mandatory = $false, HelpMessage = "Select if User or Machine Installation Scope", Position = 3)]
     [ValidateSet('User', 'Machine')]
     [string]$Scope = "User"
@@ -58,7 +61,10 @@ try {
     if(!$AcceptAgreements) {
         Write-Verbose -Message "Install WinGet Package $($PackageId)"
         
+<<<<<<< HEAD
         # Is this going to be Machine Scope Install
+=======
+>>>>>>> main
         if($scope -eq "Machine" ) {
             Write-Verbose -Message "Install $($PackageId) as Machine"
             Start-Process -FilePath "WinGet" -ArgumentList "install -e --id $($PackageId) --scope Machine" -ErrorAction Stop -Wait -NoNewWindow
@@ -69,7 +75,11 @@ try {
         }
     } else {
         Write-Verbose -Message "Install WinGet Package $($PackageId) with Package Agreement Selected"
+<<<<<<< HEAD
         # Is this going to be Machine Scope Install
+=======
+
+>>>>>>> main
         if($scope -eq "Machine" ) {        
             Write-Verbose -Message "Install $($PackageId) as Machine"
             Start-Process -FilePath "WinGet" -ArgumentList "install --id $($PackageId) --accept-package-agreements --scope Machine " -ErrorAction Stop -Wait -NoNewWindow
