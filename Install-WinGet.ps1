@@ -20,7 +20,7 @@
             Author: Jamie Price
             Date: 07/08/2022
             FileName: Install-WinGet.ps1
-            Version = 1.1
+            Version = 1.0
         =================================
 #>
 
