@@ -26,35 +26,43 @@
 
 [cmdletbinding()]
 param(    
+
+    #URL of WinGet (Microsoft.DesktopAppInstaller) package
     [Parameter(Mandatory = $false)]       
     [string]$PackageUrl = "https://github.com/microsoft/winget-cli/releases/download/v1.3.2091/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle",
 
+    #Download location for WinGet (Microsoft.AppInstaller) package
     [Parameter(Mandatory = $false)]       
     [string]$DownloadLocation = "$($env:USERPROFILE)\Downloads"    
 )
 
+#Variables 
+[bool]$freshInstall | out-null
+
 Write-Verbose -Message "Checking Download Location $($DownloadLocation)"
 if(!(Test-Path -Path $DownloadLocation)) {
-    Write-Error -Message "Unable to find download location $($DownloadLocation)"
+    Write-Error -Message "Unable to find download location $($DownloadLocation)" -RecommendedAction "Check the download location is available"
     return
 }
 
 Write-Verbose -Message "Downloading the WinGet Install"
 try {
         
-    Write-Verbose -Message "As the Installer already been downloaded?"
+    #Checking if WinGet (Microsoft.AppInstaller.msixbundle already downloaded)
     if((Test-Path -Path "$($DownloadLocation)\WinGetAppInstaller.msixbundle" )) {
         
-        $ifAppInstallerIsPresent = Read-Host "App Installer is already download, do you want to overwrite (Y/N)?"        
-        
-        Write-Verbose -Message "Responding to User Input"
-        if($ifAppInstallerIsPresent -eq "Y") {            
+        #Asking the User if want to re-download and overwrite
+        $ifAppInstallerIsPresent = Read-Host "App Installer is already download, do you want to re-download overwrite (Y/N)?"                            
+        if($ifAppInstallerIsPresent.ToLower -eq "y") {            
+            
             Write-Host "Redownloading Package" -ForegroundColor Yellow
             Invoke-WebRequest -Uri $PackageUrl -OutFile "$($DownloadLocation)\WinGetAppInstaller.msixbundle" -ErrorAction Stop
-            Write-Host "Download Completed" -ForegroundColor Green
+            
+            Write-Host "Download Completed" -ForegroundColor Green            
+            $freshInstall = $true
         }
         else {
-            Write-Host "Continuing on with Installation" -ForegroundColor Green
+            Write-Host "Continuing on to next Step -> Installation" -ForegroundColor Green
         }        
     }
     else {
@@ -71,19 +79,33 @@ catch {
 Write-Verbose -Message "Install WinGet"
 try {
     
+    #Checking if WinGet (Microsoft.AppInstaller is already installed)
     if(!(Get-AppPackage -Name "Microsoft.DesktopAppInstaller")) {
+
+        #Instaling WinGet (Microsoft.DesktopAppInstaller)
         Write-Verbose -Message "Installing Microsoft AppInsaller"
         Add-AppPackage -Path "$($DownloadLocation)\WinGetAppInstaller.msixbundle" -ErrorAction Stop      
+
+        #Display Output Message
         Write-Host "Microsoft.DesktopAppInstaller now installed" -ForegroundColor Green
     }
-    else {
+    elseif(!$freshInstall) {
 
+        #Asking User if want to re-install WinGet (Microsoft.DesktopAppInstall) package
         $reinstall = Read-host "Do you wish to re-install Microsoft DesktopInstaller (Y/N)"
+        
+        #Processing User Response
         if($reinstall.ToLower -eq "y") {
-            Write-Verbose -Message "Installing Microsoft AppInsaller"
+
+            Write-Verbose -Message "Re-Installing Microsoft AppInsaller"            
             Add-AppPackage -Path "$($DownloadLocation)\WinGetAppInstaller.msixbundle" -ErrorAction Stop      
-            Write-Host "Microsoft.DesktopAppInstaller now installed" -ForegroundColor Green
+
+            #Output Message
+            Write-Host "Microsoft.DesktopAppInstaller now re-installed" -ForegroundColor Green
         }
+    }
+    else {
+        Write-Host "Completing Installation" -ForegroundColor Green
     }
 }
 catch {
@@ -91,4 +113,5 @@ catch {
     return
 }
 
+#Script Completed
 Write-Host "Installation Completed" -ForegroundColor Green
