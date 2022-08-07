@@ -39,6 +39,7 @@ param(
 #Variables 
 [bool]$freshInstall | out-null
 
+#region Check Download Location
 Write-Verbose -Message "Checking Download Location $($DownloadLocation)"
 if(!(Test-Path -Path $DownloadLocation)) {
     Write-Error -Message "Unable to find download location $($DownloadLocation)" -RecommendedAction "Check the download location is available"
